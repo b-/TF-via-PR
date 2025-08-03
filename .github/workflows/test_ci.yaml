@@ -61,6 +61,7 @@ jobs:
         uses: ./
         with:
           working-directory: tests/${{ matrix.test }}
+          tool: ${{ matrix.tool }}
           command: ${{ github.event.pull_request.merged && 'apply' || 'plan' }}
           arg-lock: ${{ github.event.pull_request.merged }}
           arg-refresh: ${{ github.event.pull_request.merged && 'false' || 'true' }}
@@ -78,7 +79,6 @@ jobs:
           expand-diff: true
           hide-args: detailed-exitcode,lock,out,refresh
           tag-actor: never
-          tool: ${{ matrix.tool }}
 
       - name: Echo TF
         continue-on-error: true
