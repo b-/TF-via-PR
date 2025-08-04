@@ -9,6 +9,7 @@ on:
 
 jobs:
   ci:
+    name: Run Terraform Actions
     runs-on: ubuntu-24.04
 
     permissions:
@@ -76,7 +77,6 @@ jobs:
           retention-days: 1
 
           comment-pr: ${{ matrix.tool == 'tofu' && 'always' || 'never' }}
-          expand-diff: true
           hide-args: detailed-exitcode,lock,out,refresh
           tag-actor: never
 
