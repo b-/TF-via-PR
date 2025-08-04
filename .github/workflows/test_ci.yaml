@@ -9,7 +9,6 @@ on:
 
 jobs:
   ci:
-    name: Run Terraform Actions
     runs-on: ubuntu-24.04
 
     permissions:
