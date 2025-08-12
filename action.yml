@@ -232,7 +232,7 @@ runs:
         ${{ inputs.tool }}${{ steps.arg.outputs.arg-chdir }} show -json tfplan.parity | jq --sort-keys '[(.resource_changes? // [])[] | select(.change.actions != ["no-op"])]' > tfplan.new
         ${{ inputs.tool }}${{ steps.arg.outputs.arg-chdir }} show -json tfplan | jq --sort-keys '[(.resource_changes? // [])[] | select(.change.actions != ["no-op"])]' > tfplan.old
         # If both plan files are identical, then replace the old plan file with the new one to prevent avoidable stale apply.
-        diff -q tfplan.new tfplan.old && mv --force --verbose "${{ format('{0}{1}tfplan.parity', inputs.arg-chdir || inputs.working-directory, (inputs.arg-chdir || inputs.working-directory) && '/' || '') }}" "${{ format('{0}{1}tfplan', inputs.arg-chdir || inputs.working-directory, (inputs.arg-chdir || inputs.working-directory) && '/' || '') }}"
+        diff --brief tfplan.new tfplan.old && mv --force --verbose "${{ format('{0}{1}tfplan.parity', inputs.arg-chdir || inputs.working-directory, (inputs.arg-chdir || inputs.working-directory) && '/' || '') }}" "${{ format('{0}{1}tfplan', inputs.arg-chdir || inputs.working-directory, (inputs.arg-chdir || inputs.working-directory) && '/' || '') }}"
         rm --force tfplan.new tfplan.old "${{ format('{0}{1}tfplan.parity', inputs.arg-chdir || inputs.working-directory, (inputs.arg-chdir || inputs.working-directory) && '/' || '') }}"
 
     - id: apply
