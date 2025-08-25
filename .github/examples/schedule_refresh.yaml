@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      actions: read        # Required to identify workflow run.
-      checks: write        # Required to add status summary.
-      contents: read       # Required to checkout repository.
-      issues: write        # Required to open issue.
+      actions: read  # Required to identify workflow run.
+      checks: write  # Required to add status summary.
+      contents: read # Required to checkout repository.
+      issues: write  # Required to open issue.
 
     steps:
       - name: Checkout repository
@@ -31,7 +31,7 @@ jobs:
           working-directory: path/to/directory
           command: plan
           arg-lock: false
-          comment-pr: false
+          comment-pr: never
           plan-encrypt: ${{ secrets.PASSPHRASE }}
 
       - name: Open issue on drift
