@@ -323,6 +323,8 @@ runs:
       env:
         exitcode: ${{ steps.apply.outputs.exit_code || steps.plan.outputs.exit_code || steps.validate.outputs.exit_code || steps.initialize.outputs.exit_code || steps.format.outputs.exit_code }}
         GH_MATRIX: ${{ toJSON(matrix) }}
+        INPUTS_COMMAND: ${{ inputs.command }}
+        INPUTS_COMMENT_METHOD: ${{ inputs.comment-method }}
         INPUTS_COMMENT_PR: ${{ inputs.comment-pr }}
         INPUTS_EXPAND_DIFF: ${{ inputs.expand-diff }}
         INPUTS_EXPAND_SUMMARY: ${{ inputs.expand-summary }}
@@ -330,7 +332,6 @@ runs:
         INPUTS_PRESERVE_PLAN: ${{ inputs.preserve-plan }}
         INPUTS_SHOW_ARGS: ${{ inputs.show-args }}
         INPUTS_TAG_ACTOR: ${{ inputs.tag-actor }}
-        INPUTS_COMMENT_METHOD: ${{ inputs.comment-method }}
         path: ${{ format('{0}{1}tfplan', inputs.arg-chdir || inputs.working-directory, (inputs.arg-chdir || inputs.working-directory) && '/' || '') }}
       shell: bash
       run: |
@@ -476,8 +477,7 @@ runs:
         # Clean up files.
         rm --force tf.command.txt tf.console.txt tf.diff.txt
 
-        # The remainder of the code relates to commenting on the PR.
-        # Exit early if we don't have a relevant PR.
+        # Exit early if there is no PR to comment on.
         if [[ "${{ steps.identifier.outputs.pr }}" -eq 0 ]]; then
           exit 0
         fi
@@ -489,16 +489,20 @@ runs:
         # Determine if a PR comment should be created.
         if [[ "$INPUTS_COMMENT_PR" == "always" ]]; then
           create_comment="true"
-        elif [[ ("$INPUTS_COMMENT_PR" == "on-diff" || "$INPUTS_COMMENT_PR" == "on-change") && "$exitcode" -ne 0 ]]; then
+        elif [[ ("$INPUTS_COMMENT_PR" == "on-diff" || "$INPUTS_COMMENT_PR" == "on-change") && "$INPUTS_COMMAND" == "plan" && "$exitcode" -ne 0 ]]; then
+          create_comment="true"
+        elif [[ ("$INPUTS_COMMENT_PR" == "on-diff" || "$INPUTS_COMMENT_PR" == "on-change") && "$INPUTS_COMMAND" != "plan" && -n "$bot_comment" ]]; then
           create_comment="true"
         elif [[ ("$INPUTS_COMMENT_PR" == "on-diff" || "$INPUTS_COMMENT_PR" == "on-change") && "$exitcode" -eq 0 && -n "$bot_comment" ]]; then
           gh api /repos/${{ github.repository }}/issues/comments/${bot_comment} --header "$GH_API" --method DELETE
           exit 0
         fi
+
         # Exit early if no comment is needed.
         if [[ "$create_comment" != "true" ]]; then
           exit 0
         fi
+
         # Create PR comment based on configuration and existing comment.
         if [[ -n "$bot_comment" ]]; then
           if [[ "$INPUTS_COMMENT_METHOD" == "update" ]]; then
